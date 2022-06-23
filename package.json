@@ -1,0 +1,41 @@
+{
+  "name": "@moeindana/monorepo",
+  "private": true,
+  "description": "Monorepo for OAuth2 providers in React",
+  "workspaces": [
+    "packages/*",
+    "packages/@moeindana/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development turbo run dev",
+    "dev:google": "npm run dev -- --filter=...@dana/google-oauth",
+    "build": "cross-env NODE_ENV=production turbo run build",
+    "prettier:check": "prettier . --check --ignore-unknown --ignore-path .gitignore",
+    "prettier:fix": "prettier . --write --ignore-unknown --ignore-path .gitignore",
+    "prerelease": "npm run build -- --filter=./packages/@dana/*",
+    "changeset": "changeset",
+    "release": "changeset publish",
+    "commit": "cz",
+    "prepare": "is-ci || husky install"
+  },
+  "devDependencies": {
+    "@changesets/changelog-github": "^0.4.4",
+    "@changesets/cli": "^2.22.0",
+    "@commitlint/cli": "^16.3.0",
+    "@commitlint/config-conventional": "^16.2.4",
+    "commitizen": "^4.2.4",
+    "cross-env": "^7.0.3",
+    "cz-conventional-changelog": "^3.3.0",
+    "husky": "^8.0.1",
+    "is-ci": "^3.0.1",
+    "lint-staged": "^12.4.1",
+    "prettier": "^2.6.2",
+    "turbo": "^1.2.9"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  }
+}
