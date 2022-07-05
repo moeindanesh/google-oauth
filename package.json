@@ -5,7 +5,7 @@
   "workspaces": [
     "packages/*",
     "packages/@moeindana/*",
-    "apps/*"
+    "app"
   ],
   "scripts": {
     "dev": "cross-env NODE_ENV=development turbo run dev",
@@ -37,5 +37,6 @@
     "commitizen": {
       "path": "cz-conventional-changelog"
     }
-  }
+  },
+  "packageManager": "yarn@3.2.1"
 }

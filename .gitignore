@@ -9,6 +9,9 @@ coverage
 # production
 build
 dist
+.next
+.yarn
+app
 
 # misc
 .DS_Store

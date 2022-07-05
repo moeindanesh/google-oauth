@@ -10,11 +10,22 @@ import {
   OverridableTokenClientConfig,
 } from '../types';
 
+type TokenResponseWithUserData = TokenResponse & {
+  email?: string;
+  family_name?: string;
+  given_name?: string;
+  id?: string;
+  locale?: string;
+  name?: string;
+  picture?: string;
+  verified_email?: boolean;
+};
+
 interface ImplicitFlowOptions
   extends Omit<TokenClientConfig, 'client_id' | 'scope' | 'callback'> {
   onSuccess?: (
     tokenResponse: Omit<
-      TokenResponse,
+      TokenResponseWithUserData,
       'error' | 'error_description' | 'error_uri'
     >,
   ) => void;
@@ -64,7 +75,6 @@ export default function useGoogleLogin(
 ): () => void;
 
 export default function useGoogleLogin({
-  flow = 'implicit',
   scope = '',
   onSuccess,
   onError,
@@ -82,27 +92,34 @@ export default function useGoogleLogin({
   useEffect(() => {
     if (!scriptLoadedSuccessfully) return;
 
-    const clientMethod =
-      flow === 'implicit' ? 'initTokenClient' : 'initCodeClient';
+    const clientMethod = 'initTokenClient';
+    // const clientMethod =
+    //   flow === 'implicit' ? 'initTokenClient' : 'initCodeClient';
 
     const client = window.google?.accounts.oauth2[clientMethod]({
       client_id: clientId,
-      scope: `openid profile email ${scope}`,
-      callback: (response: TokenResponse | CodeResponse) => {
-        if (response.error) return onErrorRef.current?.(response);
-
-        onSuccessRef.current?.(response as any);
+      scope: `openid profile email https://www.googleapis.com/auth/userinfo.profile ${scope}`,
+      callback: (response: TokenResponse) => {
+        fetch(
+          `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${response.access_token}`,
+        )
+          .then(res => res.json())
+          .then(res => {
+            onSuccessRef.current?.({
+              ...res,
+              ...response,
+            });
+          });
       },
       ...props,
     });
-
     clientRef.current = client;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clientId, scriptLoadedSuccessfully, flow, scope]);
+  }, [clientId, scriptLoadedSuccessfully, scope]);
 
   const loginImplicitFlow = useCallback(
     (overrideConfig?: OverridableTokenClientConfig) =>
-      clientRef.current.requestAccessToken(overrideConfig),
+      clientRef.current?.requestAccessToken(overrideConfig),
     [],
   );
 
@@ -111,5 +128,5 @@ export default function useGoogleLogin({
     [],
   );
 
-  return flow === 'implicit' ? loginImplicitFlow : loginAuthCodeFlow;
+  return loginImplicitFlow;
 }
